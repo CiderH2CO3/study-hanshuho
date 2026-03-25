@@ -76,6 +76,31 @@
         float: right;
       }
 
+      /* テーブルのスタイル */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 15px 0;
+        font-size: 0.85em;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #006cb4;
+        color: white;
+        font-weight: bold;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
       /* Mermaid diagrams fitting */
       .mermaid {
         width: 100%;
