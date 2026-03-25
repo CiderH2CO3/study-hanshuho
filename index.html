@@ -1,7 +1,7 @@
 <DOCTYPE html>
 <html>
 <head>
-  <title>タイトル</title>
+  <title>犯罪収益移転防止法 本人確認手段 解説スライド</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css">
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
@@ -80,9 +80,63 @@
 <body>
   <!-- Remarkjs -->
   <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript"></script>
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script type="text/javascript">
     // sample.md
-    var slideshow = remark.create({sourceUrl: "hanshuho.md"});
+    var slideshow = remark.create({
+      sourceUrl: "hanshuho.md",
+      highlightStyle: 'monokai',
+      highlightLines: true,
+      ratio: '16:9',
+      highlightLanguage: 'remark' // Disable automatic language detection for highlighting
+    }, function() {
+      // Transform ```mermaid blocks into <div class="mermaid">
+      // Remark.js renders all slides at once, so we can transform all of them.
+      document.querySelectorAll('code.remark-code').forEach(function(block) {
+        const text = block.textContent.trim();
+        if (text.startsWith('sequenceDiagram') ||
+            text.startsWith('graph ') ||
+            text.startsWith('flowchart ')) {
+          const pre = block.parentElement;
+          const div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = text;
+          // Ensure it's not hidden by display:none before replacement
+          pre.parentNode.replaceChild(div, pre);
+        }
+      });
+
+      // Mermaid configuration
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        fontFamily: 'arial'
+      });
+
+      const renderMermaid = function() {
+        var diagrams = document.querySelectorAll('.remark-visible .mermaid:not([data-processed="true"])');
+        if (diagrams.length > 0) {
+          mermaid.init(undefined, diagrams);
+        }
+      };
+
+      // Render mermaid diagrams on each slide change
+      slideshow.on('afterShowSlide', function (slide) {
+        renderMermaid();
+      });
+
+      // Initial render
+      renderMermaid();
+    });
+
+    // Fallback error handling for sourceUrl
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.src && e.target.src.indexOf('hanshuho.md') !== -1) {
+        document.body.innerHTML = '<div style="padding: 20px;"><h1>Error loading hanshuho.md</h1><p>Please ensure the file exists and is accessible.</p></div>';
+      }
+    }, true);
   </script>
 </body>
 </html>
