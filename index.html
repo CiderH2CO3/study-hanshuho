@@ -83,31 +83,25 @@
   <!-- Mermaid -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script type="text/javascript">
-    // sample.md
     var slideshow = remark.create({
       sourceUrl: "hanshuho.md",
       highlightStyle: 'monokai',
       highlightLines: true,
       ratio: '16:9',
-      highlightLanguage: 'remark' // Disable automatic language detection for highlighting
-    }, function() {
-      // Transform ```mermaid blocks into <div class="mermaid">
-      // Remark.js renders all slides at once, so we can transform all of them.
-      document.querySelectorAll('code.remark-code').forEach(function(block) {
-        const text = block.textContent.trim();
-        if (text.startsWith('sequenceDiagram') ||
-            text.startsWith('graph ') ||
-            text.startsWith('flowchart ')) {
-          const pre = block.parentElement;
-          const div = document.createElement('div');
-          div.className = 'mermaid';
-          div.textContent = text;
-          // Ensure it's not hidden by display:none before replacement
-          pre.parentNode.replaceChild(div, pre);
-        }
-      });
+      highlightLanguage: 'none' // Disable highlighting to prevent artifacts
+    });
 
-      // Mermaid configuration
+    function initMermaid() {
+      if (window.mermaidInitialized) {
+        renderVisibleMermaid();
+        return;
+      }
+
+      const codeBlocks = document.querySelectorAll('code.remark-code');
+      if (codeBlocks.length === 0) return;
+
+      window.mermaidInitialized = true;
+
       mermaid.initialize({
         startOnLoad: false,
         theme: 'default',
@@ -115,21 +109,64 @@
         fontFamily: 'arial'
       });
 
-      const renderMermaid = function() {
-        var diagrams = document.querySelectorAll('.remark-visible .mermaid:not([data-processed="true"])');
-        if (diagrams.length > 0) {
-          mermaid.init(undefined, diagrams);
+      codeBlocks.forEach(function(block) {
+        // Remark.js often wraps each line in a span with class "remark-code-line"
+        let lines = block.querySelectorAll('.remark-code-line');
+        let text;
+        if (lines.length > 0) {
+          text = Array.from(lines).map(line => line.textContent).join('\n');
+        } else {
+          text = block.textContent;
         }
-      };
+        text = text.trim();
 
-      // Render mermaid diagrams on each slide change
-      slideshow.on('afterShowSlide', function (slide) {
-        renderMermaid();
+        if (text.startsWith('sequenceDiagram') ||
+            text.startsWith('graph ') ||
+            text.startsWith('graph TD') ||
+            text.startsWith('graph LR') ||
+            text.startsWith('flowchart ')) {
+          const pre = block.parentElement;
+          const div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = text;
+          pre.parentNode.replaceChild(div, pre);
+        }
       });
 
-      // Initial render
-      renderMermaid();
+      renderVisibleMermaid();
+    }
+
+    function renderVisibleMermaid() {
+      var diagrams = document.querySelectorAll('.remark-visible .mermaid:not([data-processed="true"])');
+      diagrams.forEach(function(diagram) {
+        try {
+          // Use modern API
+          mermaid.run({
+            nodes: [diagram]
+          }).then(() => {
+            diagram.setAttribute('data-processed', 'true');
+          }).catch(err => {
+            console.error("Mermaid run error:", err);
+            // Fallback
+            mermaid.init(undefined, diagram);
+            diagram.setAttribute('data-processed', 'true');
+          });
+        } catch (e) {
+          console.error("Mermaid init error:", e);
+        }
+      });
+    }
+
+    slideshow.on('afterShowSlide', function (slide) {
+      if (window.mermaidInitialized) {
+        renderVisibleMermaid();
+      } else {
+        initMermaid();
+      }
     });
+
+    // Handle initial load
+    setTimeout(initMermaid, 500);
 
     // Fallback error handling for sourceUrl
     window.addEventListener('error', function(e) {
