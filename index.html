@@ -1,4 +1,4 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>犯罪収益移転防止法 本人確認手段 解説スライド</title>
@@ -25,9 +25,10 @@
         color: #006cb4;
         font-weight: 700;
       }
-      .remark-slide-content h1 { font-size: 3em; }
-      .remark-slide-content h2 { font-size: 2em; }
-      .remark-slide-content h3 { font-size: 1.4em; }
+      .remark-slide-content h1 { font-size: 2.3em; margin-bottom: 0.3em; margin-top: 0; }
+      .remark-slide-content h2 { font-size: 1.6em; margin-bottom: 0.3em; }
+      .remark-slide-content h3 { font-size: 1.2em; margin-bottom: 0.2em; }
+      .remark-slide-content p, .remark-slide-content li { font-size: 0.95em; line-height: 1.4; }
       .footnote {
         position: absolute;
         bottom: 1em;
@@ -68,12 +69,51 @@
       }
       /* 左右二段表示 */
       .left-column {
-        width: 48%;
+        width: 47%;
         float: left;
+        margin-right: 1%;
       }
       .right-column {
-        width: 48%;
+        width: 47%;
         float: right;
+        margin-left: 1%;
+      }
+
+      /* テーブルのスタイル */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 15px 0;
+        font-size: 0.85em;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #006cb4;
+        color: white;
+        font-weight: bold;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      /* Mermaid diagrams fitting */
+      .mermaid {
+        width: 100%;
+        overflow: hidden;
+      }
+      .mermaid svg {
+        max-width: 100%;
+        max-height: 450px; /* Limit height to prevent overflow on slides */
+        display: block;
+        margin: auto;
       }
     </style>
 </head>
