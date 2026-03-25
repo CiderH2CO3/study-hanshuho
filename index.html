@@ -1,7 +1,7 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>タイトル</title>
+  <title>犯罪収益移転防止法 本人確認手段 解説スライド</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css">
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
@@ -25,9 +25,9 @@
         color: #006cb4;
         font-weight: 700;
       }
-      .remark-slide-content h1 { font-size: 3em; }
-      .remark-slide-content h2 { font-size: 2em; }
-      .remark-slide-content h3 { font-size: 1.4em; }
+      .remark-slide-content h1 { font-size: 2.5em; margin-bottom: 0.5em; }
+      .remark-slide-content h2 { font-size: 1.8em; margin-bottom: 0.4em; }
+      .remark-slide-content h3 { font-size: 1.3em; margin-bottom: 0.3em; }
       .footnote {
         position: absolute;
         bottom: 1em;
@@ -75,14 +75,117 @@
         width: 48%;
         float: right;
       }
+
+      /* Mermaid diagrams fitting */
+      .mermaid {
+        width: 100%;
+        overflow: hidden;
+      }
+      .mermaid svg {
+        max-width: 100%;
+        max-height: 450px; /* Limit height to prevent overflow on slides */
+        display: block;
+        margin: auto;
+      }
     </style>
 </head>
 <body>
   <!-- Remarkjs -->
   <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript"></script>
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script type="text/javascript">
-    // sample.md
-    var slideshow = remark.create({sourceUrl: "hanshuho.md"});
+    var slideshow = remark.create({
+      sourceUrl: "hanshuho.md",
+      highlightStyle: 'monokai',
+      highlightLines: true,
+      ratio: '16:9',
+      highlightLanguage: 'none' // Disable highlighting to prevent artifacts
+    });
+
+    function initMermaid() {
+      if (window.mermaidInitialized) {
+        renderVisibleMermaid();
+        return;
+      }
+
+      const codeBlocks = document.querySelectorAll('code.remark-code');
+      if (codeBlocks.length === 0) return;
+
+      window.mermaidInitialized = true;
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        fontFamily: 'arial'
+      });
+
+      codeBlocks.forEach(function(block) {
+        // Remark.js often wraps each line in a span with class "remark-code-line"
+        let lines = block.querySelectorAll('.remark-code-line');
+        let text;
+        if (lines.length > 0) {
+          text = Array.from(lines).map(line => line.textContent).join('\n');
+        } else {
+          text = block.textContent;
+        }
+        text = text.trim();
+
+        if (text.startsWith('sequenceDiagram') ||
+            text.startsWith('graph ') ||
+            text.startsWith('graph TD') ||
+            text.startsWith('graph LR') ||
+            text.startsWith('flowchart ')) {
+          const pre = block.parentElement;
+          const div = document.createElement('div');
+          div.className = 'mermaid';
+          div.textContent = text;
+          pre.parentNode.replaceChild(div, pre);
+        }
+      });
+
+      renderVisibleMermaid();
+    }
+
+    function renderVisibleMermaid() {
+      var diagrams = document.querySelectorAll('.remark-visible .mermaid:not([data-processed="true"])');
+      diagrams.forEach(function(diagram) {
+        try {
+          // Use modern API
+          mermaid.run({
+            nodes: [diagram]
+          }).then(() => {
+            diagram.setAttribute('data-processed', 'true');
+          }).catch(err => {
+            console.error("Mermaid run error:", err);
+            // Fallback
+            mermaid.init(undefined, diagram);
+            diagram.setAttribute('data-processed', 'true');
+          });
+        } catch (e) {
+          console.error("Mermaid init error:", e);
+        }
+      });
+    }
+
+    slideshow.on('afterShowSlide', function (slide) {
+      if (window.mermaidInitialized) {
+        renderVisibleMermaid();
+      } else {
+        initMermaid();
+      }
+    });
+
+    // Handle initial load
+    setTimeout(initMermaid, 500);
+
+    // Fallback error handling for sourceUrl
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.src && e.target.src.indexOf('hanshuho.md') !== -1) {
+        document.body.innerHTML = '<div style="padding: 20px;"><h1>Error loading hanshuho.md</h1><p>Please ensure the file exists and is accessible.</p></div>';
+      }
+    }, true);
   </script>
 </body>
 </html>
