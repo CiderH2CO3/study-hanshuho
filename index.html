@@ -84,7 +84,7 @@
         border-collapse: collapse;
         width: 100%;
         margin: 15px 0;
-        font-size: 0.85em;
+        font-size: 1.0em; /* Increased for readability */
         box-shadow: 0 2px 3px rgba(0,0,0,0.1);
       }
       th, td {
@@ -128,19 +128,12 @@
       highlightStyle: 'monokai',
       highlightLines: true,
       ratio: '16:9',
-      highlightLanguage: 'none' // Disable highlighting to prevent artifacts
+      highlightLanguage: 'none'
     });
 
     function initMermaid() {
-      if (window.mermaidInitialized) {
-        renderVisibleMermaid();
-        return;
-      }
-
       const codeBlocks = document.querySelectorAll('code.remark-code');
       if (codeBlocks.length === 0) return;
-
-      window.mermaidInitialized = true;
 
       mermaid.initialize({
         startOnLoad: false,
@@ -148,12 +141,11 @@
         securityLevel: 'loose',
         fontFamily: 'arial',
         themeVariables: {
-          fontSize: '24px'
+          fontSize: '28px'
         }
       });
 
       codeBlocks.forEach(function(block) {
-        // Remark.js often wraps each line in a span with class "remark-code-line"
         let lines = block.querySelectorAll('.remark-code-line');
         let text;
         if (lines.length > 0) {
@@ -179,44 +171,24 @@
       renderVisibleMermaid();
     }
 
-    function renderVisibleMermaid() {
+    async function renderVisibleMermaid() {
       var diagrams = document.querySelectorAll('.remark-visible .mermaid:not([data-processed="true"])');
-      diagrams.forEach(function(diagram) {
+      for (let diagram of diagrams) {
         try {
-          // Use modern API
-          mermaid.run({
-            nodes: [diagram]
-          }).then(() => {
-            diagram.setAttribute('data-processed', 'true');
-          }).catch(err => {
-            console.error("Mermaid run error:", err);
-            // Fallback
-            mermaid.init(undefined, diagram);
-            diagram.setAttribute('data-processed', 'true');
-          });
+          await mermaid.run({ nodes: [diagram] });
+          diagram.setAttribute('data-processed', 'true');
         } catch (e) {
-          console.error("Mermaid init error:", e);
+          console.error("Mermaid error:", e);
         }
-      });
+      }
     }
 
     slideshow.on('afterShowSlide', function (slide) {
-      if (window.mermaidInitialized) {
-        renderVisibleMermaid();
-      } else {
-        initMermaid();
-      }
+      renderVisibleMermaid();
     });
 
-    // Handle initial load
+    // Start initialization after a short delay to allow Remark to settle
     setTimeout(initMermaid, 500);
-
-    // Fallback error handling for sourceUrl
-    window.addEventListener('error', function(e) {
-      if (e.target && e.target.src && e.target.src.indexOf('hanshuho.md') !== -1) {
-        document.body.innerHTML = '<div style="padding: 20px;"><h1>Error loading hanshuho.md</h1><p>Please ensure the file exists and is accessible.</p></div>';
-      }
-    }, true);
   </script>
 </body>
 </html>
